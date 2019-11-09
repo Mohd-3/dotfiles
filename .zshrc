@@ -7,10 +7,10 @@ export TERM=xterm-256color
 [[ $- != *i* ]] && return
 [[ -z "$TMUX" ]] && exec tmux
 
+ZSH_THEME="fwalch"
 export ZSH=/home/mad/.oh-my-zsh
 plugins=(git)
 source $ZSH/oh-my-zsh.sh
-ZSH_THEME="fwalch"
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
