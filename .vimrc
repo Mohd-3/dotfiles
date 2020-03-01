@@ -11,11 +11,11 @@ endif
 execute pathogen#infect()
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
+set runtimepath^=~/.vim/bundle/ctrlp.vim
 
+set updatetime=100
 set noshowmode
 set laststatus=2
-
-map <C-n> :NERDTreeToggle<CR>
 
 set number relativenumber
 set showcmd
@@ -32,8 +32,12 @@ let mapleader=","
 
 inoremap jj <Esc>
 
-nnoremap <leader>u :GundoToggle<CR>
+"nnoremap <leader>u :GundoToggle<CR>
+nnoremap <leader>n :NERDTreeToggle<CR>
 
+let @m = 'iclass (models.Model):bbbbbi'
+let @s = 'iclass (serializers.Serializer):bbbbbi'
+let @v = 'iclass (APIView):bbbi'
 set backspace=indent,eol,start
 "set visualbell
 set noswapfile

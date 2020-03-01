@@ -1,17 +1,23 @@
 alias python=python3
 alias tmux='tmux -2'
-alias pip=pip3
-alias touchoff='xinput --set-prop 13 "Device Enabled" 0'
-alias touchon='xinput --set-prop 13 "Device Enabled" 1'
+#alias pip=pip3
+alias touchoff='xinput --set-prop 14 "Device Enabled" 0'
+alias touchon='xinput --set-prop 14 "Device Enabled" 1'
+alias flutter='/home/mad/Downloads/flutter/bin/flutter'
 export TERM=xterm-256color
 [[ $- != *i* ]] && return
 [[ -z "$TMUX" ]] && exec tmux
 
-ZSH_THEME="fwalch"
 export ZSH=/home/mad/.oh-my-zsh
+ZSH_THEME="fwalch"
 plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
+ggg() {
+    g++ -std=c++17 "$1" -o "$2"
+}
+
+bindkey -v
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
