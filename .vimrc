@@ -1,4 +1,19 @@
 set term=screen-256color
+set nocompatible
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'cohlin/vim-colorschemes'
+Plugin 'kien/ctrlp.vim'
+Plugin 'itchyny/lightline.vim'
+Plugin 'tomtom/tcomment_vim'
+Plugin 'preservim/nerdtree'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-fugitive'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'mileszs/ack.vim'
+call vundle#end() 
 syntax on
 filetype plugin indent on
 set background=dark
@@ -8,7 +23,7 @@ if $TERM == "xterm-256color"
     set t_Co=256
 endif
 
-execute pathogen#infect()
+"execute pathogen#infect()
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
 set runtimepath^=~/.vim/bundle/ctrlp.vim
