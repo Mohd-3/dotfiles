@@ -2,17 +2,19 @@ set term=screen-256color
 set nocompatible
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
+set wildignore+=*/__pycache__/,*/venv/*,*/backendenv/*,*/env/*,*.pyc
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'cohlin/vim-colorschemes'
 Plugin 'kien/ctrlp.vim'
-Plugin 'itchyny/lightline.vim'
+Plugin 'mohd-3/lightline.vim'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'preservim/nerdtree'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'mileszs/ack.vim'
+Plugin 'dart-lang/dart-vim-plugin'
 call vundle#end() 
 syntax on
 filetype plugin indent on
@@ -43,12 +45,17 @@ nnoremap k gk
 nnoremap B ^
 nnoremap E $
 
-let mapleader=","
+let mapleader=" "
 
 inoremap jj <Esc>
 
 "nnoremap <leader>u :GundoToggle<CR>
 nnoremap <leader>n :NERDTreeToggle<CR>
+
+vnoremap <Right>  xpgvlolo
+vnoremap <left>   xhPgvhoho
+vnoremap <Down>   xjPgvjojo
+vnoremap <Up>     xkPgvkoko
 
 let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
