@@ -15,6 +15,7 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'mileszs/ack.vim'
 Plugin 'dart-lang/dart-vim-plugin'
+Plugin 'tpope/vim-eunuch'
 call vundle#end() 
 syntax on
 filetype plugin indent on
