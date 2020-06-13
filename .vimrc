@@ -16,6 +16,8 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'mileszs/ack.vim'
 Plugin 'dart-lang/dart-vim-plugin'
 Plugin 'tpope/vim-eunuch'
+Plugin 'yegappan/taglist'
+Plugin 'jmcantrell/vim-virtualenv'
 call vundle#end() 
 syntax on
 filetype plugin indent on
@@ -80,3 +82,17 @@ set hlsearch
 set ignorecase
 set smartcase
 set clipboard=unnamedplus
+
+function! s:ZoomToggle() abort
+    if exists('t:zoomed') && t:zoomed
+        execute t:zoom_winrestcmd
+        let t:zoomed = 0
+    else
+        let t:zoom_winrestcmd = winrestcmd()
+        resize
+        vertical resize
+        let t:zoomed = 1
+    endif
+endfunction
+command! ZoomToggle call s:ZoomToggle()
+nnoremap <silent> <leader>a :ZoomToggle<CR>
