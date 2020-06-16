@@ -18,6 +18,7 @@ Plugin 'dart-lang/dart-vim-plugin'
 Plugin 'tpope/vim-eunuch'
 Plugin 'yegappan/taglist'
 Plugin 'jmcantrell/vim-virtualenv'
+Plugin 'mbbill/undotree'
 "Plugin 'metakirby5/codi.vim'
 call vundle#end() 
 syntax on
@@ -29,7 +30,6 @@ set background=dark
 colorscheme py-darcula
 
 "set termguicolors
-"execute pathogen#infect()
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
 set runtimepath^=~/.vim/bundle/ctrlp.vim
@@ -57,7 +57,7 @@ nnoremap E $
 nnoremap Y y$
 nnoremap <leader>n :NERDTreeToggle<CR>
 nnoremap <silent> <leader>a :ZoomToggle<CR>
-"nnoremap <leader>u :GundoToggle<CR>
+nnoremap <leader>u :UndotreeToggle<CR>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
@@ -73,6 +73,7 @@ vnoremap <Up>     xkPgvkoko
 let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
 let @v = 'iclass (APIView):bbbi'
+let g:undotree_SetFocusWhenToggle = 1
 
 set backspace=indent,eol,start
 "set visualbell
