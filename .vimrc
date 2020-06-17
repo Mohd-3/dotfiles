@@ -1,28 +1,32 @@
 "set term=screen-256color
 set nocompatible
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
+set nomodeline
 set wildignore+=*/__pycache__/,*/venv/*,*/backendenv/*,*/env/*,*.pyc
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'cohlin/vim-colorschemes'
-Plugin 'kien/ctrlp.vim'
-Plugin 'mohd-3/lightline.vim'
-Plugin 'tomtom/tcomment_vim'
-Plugin 'preservim/nerdtree'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-fugitive'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'mileszs/ack.vim'
-Plugin 'dart-lang/dart-vim-plugin'
-Plugin 'tpope/vim-eunuch'
-Plugin 'yegappan/taglist'
-Plugin 'jmcantrell/vim-virtualenv'
-Plugin 'mbbill/undotree'
-"Plugin 'metakirby5/codi.vim'
-call vundle#end() 
-syntax on
-filetype plugin indent on
+
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin('~/.vim/bundle')
+Plug 'cohlin/vim-colorschemes'
+Plug 'kien/ctrlp.vim'
+Plug 'mohd-3/lightline.vim'
+Plug 'tomtom/tcomment_vim'
+Plug 'preservim/nerdtree'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'mileszs/ack.vim'
+Plug 'dart-lang/dart-vim-plugin'
+Plug 'tpope/vim-eunuch'
+Plug 'yegappan/taglist'
+Plug 'jmcantrell/vim-virtualenv'
+Plug 'mbbill/undotree'
+"Plug 'metakirby5/codi.vim'
+call plug#end()
+
 if $TERM == "xterm-256color"
     set t_Co=256
 endif
@@ -55,9 +59,9 @@ nnoremap k gk
 nnoremap B ^
 nnoremap E $
 nnoremap Y y$
-nnoremap <leader>n :NERDTreeToggle<CR>
+nnoremap <silent> <leader>n :NERDTreeToggle<CR>
 nnoremap <silent> <leader>a :ZoomToggle<CR>
-nnoremap <leader>u :UndotreeToggle<CR>
+nnoremap <silent> <leader>u :UndotreeToggle<CR>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
