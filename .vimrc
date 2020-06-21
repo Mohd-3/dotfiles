@@ -1,4 +1,5 @@
 "set term=screen-256color
+set hidden
 set nocompatible
 set nomodeline
 set wildignore+=*/__pycache__/,*/venv/*,*/backendenv/*,*/env/*,*.pyc
@@ -24,6 +25,7 @@ Plug 'tpope/vim-eunuch'
 Plug 'yegappan/taglist'
 Plug 'jmcantrell/vim-virtualenv'
 Plug 'mbbill/undotree'
+Plug 'nvie/vim-flake8'
 "Plug 'metakirby5/codi.vim'
 call plug#end()
 
@@ -33,7 +35,9 @@ endif
 set background=dark
 colorscheme py-darcula
 
-"set termguicolors
+" if has('termguicolors')
+"   set termguicolors
+" endif
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
 set runtimepath^=~/.vim/bundle/ctrlp.vim
@@ -62,6 +66,7 @@ nnoremap Y y$
 nnoremap <silent> <leader>n :NERDTreeToggle<CR>
 nnoremap <silent> <leader>a :ZoomToggle<CR>
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
+nnoremap <silent> <leader>k :call flake8#Flake8ShowError()<cr>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
@@ -78,11 +83,13 @@ let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
 let @v = 'iclass (APIView):bbbi'
 let g:undotree_SetFocusWhenToggle = 1
+let g:flake8_show_in_file = 1
 
 set backspace=indent,eol,start
 "set visualbell
 set noswapfile
 set nobackup
+set nowritebackup
 set nowb
 
 set autoindent
@@ -100,6 +107,9 @@ set smartcase
 set clipboard=unnamedplus
 
 match Error /\%81v.\+/
+
+autocmd BufWritePost *.py call flake8#Flake8()
+"autocmd BufReadPost *.py call flake8#Flake8()
 
 if has('persistent_undo')
     let path_to_undodir = expand('~/.vim/undo_dir/')
