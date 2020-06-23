@@ -10,9 +10,18 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
+" let g:ale_completion_enabled = 1
+let g:ale_linters = {
+\   'python': ['pyls'],
+\}
+
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'python': ['isort'] 
+\}
 call plug#begin('~/.vim/bundle')
 Plug 'cohlin/vim-colorschemes'
-Plug 'kien/ctrlp.vim'
+" Plug 'kien/ctrlp.vim'
 Plug 'mohd-3/lightline.vim'
 Plug 'tomtom/tcomment_vim'
 Plug 'preservim/nerdtree'
@@ -25,8 +34,12 @@ Plug 'tpope/vim-eunuch'
 Plug 'yegappan/taglist'
 Plug 'jmcantrell/vim-virtualenv'
 Plug 'mbbill/undotree'
-Plug 'nvie/vim-flake8'
-"Plug 'metakirby5/codi.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'dense-analysis/ale'
+Plug 'maximbaz/lightline-ale'
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'metakirby5/codi.vim'
 call plug#end()
 
 if $TERM == "xterm-256color"
@@ -34,13 +47,13 @@ if $TERM == "xterm-256color"
 endif
 set background=dark
 colorscheme py-darcula
-
 " if has('termguicolors')
-"   set termguicolors
+"     set termguicolors
 " endif
+
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
-set runtimepath^=~/.vim/bundle/ctrlp.vim
+"set runtimepath^=~/.vim/bundle/ctrlp.vim
 
 set updatetime=100
 set noshowmode
@@ -50,6 +63,7 @@ set number relativenumber
 set showcmd
 set wildmenu
 set showmatch
+set signcolumn=yes
 
 set winminheight=0
 set winminwidth=0
@@ -66,7 +80,17 @@ nnoremap Y y$
 nnoremap <silent> <leader>n :NERDTreeToggle<CR>
 nnoremap <silent> <leader>a :ZoomToggle<CR>
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
-nnoremap <silent> <leader>k :call flake8#Flake8ShowError()<cr>
+nnoremap <silent> <leader>pp :Ag<CR>
+nnoremap <silent> <leader>pf :Files<CR>
+nnoremap <silent> <leader>pg :GFiles<CR>
+nnoremap <silent> <leader>ps :GFiles?<CR>
+nnoremap <silent> <leader>pt :Tags<CR>
+nnoremap <silent> <leader>pb :Buffers<CR>
+nnoremap <silent> <leader>pc :Commits<CR>
+nnoremap <silent> <leader>pcc :BCommits<CR>
+nnoremap <silent> <C-p> :Files<CR>
+nnoremap <silent> <leader>d :ALEGoToDefinition<CR>
+nnoremap <silent> <leader>r :ALEFindReferences<CR>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
@@ -83,10 +107,8 @@ let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
 let @v = 'iclass (APIView):bbbi'
 let g:undotree_SetFocusWhenToggle = 1
-let g:flake8_show_in_file = 1
 
 set backspace=indent,eol,start
-"set visualbell
 set noswapfile
 set nobackup
 set nowritebackup
@@ -108,9 +130,6 @@ set clipboard=unnamedplus
 
 match Error /\%81v.\+/
 
-autocmd BufWritePost *.py call flake8#Flake8()
-"autocmd BufReadPost *.py call flake8#Flake8()
-
 if has('persistent_undo')
     let path_to_undodir = expand('~/.vim/undo_dir/')
     if !isdirectory(path_to_undodir)
@@ -119,6 +138,31 @@ if has('persistent_undo')
     let &undodir = path_to_undodir
     set undofile
 endif
+
+" inoremap <silent><expr> <TAB>
+"       \ pumvisible() ? "\<C-n>" :
+"       \ <SID>check_back_space() ? "\<TAB>" :
+"       \ coc#refresh()
+" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+" function! s:check_back_space() abort
+"   let col = col('.') - 1
+"   return !col || getline('.')[col - 1]  =~# '\s'
+" endfunction
+
+" inoremap <silent><expr> <c-space> coc#refresh()
+" if exists('*complete_info')
+"   inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+" else
+"   inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+" endif
+" nmap <silent> [g <Plug>(coc-diagnostic-prev)
+" nmap <silent> ]g <Plug>(coc-diagnostic-next)
+" nmap <silent> gd <Plug>(coc-definition)
+" nmap <silent> gy <Plug>(coc-type-definition)
+" nmap <silent> gi <Plug>(coc-implementation)
+" nmap <silent> gr <Plug>(coc-references)
+" nmap <leader>rn <Plug>(coc-rename)
 
 function! s:ZoomToggle() abort
     if exists('t:zoomed') && t:zoomed
