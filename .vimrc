@@ -129,6 +129,9 @@ set smartcase
 set clipboard=unnamedplus
 
 match Error /\%81v.\+/
+set colorcolumn=80
+highlight ColorColumn ctermbg=236
+highlight signcolumn ctermbg=235
 
 if has('persistent_undo')
     let path_to_undodir = expand('~/.vim/undo_dir/')
