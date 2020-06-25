@@ -11,14 +11,15 @@ if empty(glob('~/.vim/autoload/plug.vim'))
 endif
 
 " let g:ale_completion_enabled = 1
-let g:ale_linters = {
+ let g:ale_linters = { 
 \   'python': ['pyls'],
-\}
+ \}
 
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \   'python': ['isort'] 
 \}
+let g:ale_set_highlights = 0
 call plug#begin('~/.vim/bundle')
 Plug 'cohlin/vim-colorschemes'
 " Plug 'kien/ctrlp.vim'
@@ -91,6 +92,7 @@ nnoremap <silent> <leader>pcc :BCommits<CR>
 nnoremap <silent> <C-p> :Files<CR>
 nnoremap <silent> <leader>d :ALEGoToDefinition<CR>
 nnoremap <silent> <leader>r :ALEFindReferences<CR>
+nnoremap <silent> <leader>e :ALENext<CR>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
