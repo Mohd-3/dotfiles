@@ -1,4 +1,4 @@
-"set term=screen-256color
+" set term=screen-256color
 set hidden
 set nocompatible
 set nomodeline
@@ -10,20 +10,21 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-" let g:ale_completion_enabled = 1
- let g:ale_linters = { 
+let g:ale_linters = { 
 \   'python': ['pyls'],
- \}
-
+\}
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['isort'] 
+\   'python': ['isort']
 \}
+let g:ale_python_black_options  = '-S -l 79'
 let g:ale_set_highlights = 0
+let g:fzf_buffers_jump = 1
+
 call plug#begin('~/.vim/bundle')
 Plug 'cohlin/vim-colorschemes'
-" Plug 'kien/ctrlp.vim'
 Plug 'mohd-3/lightline.vim'
+Plug 'mohd-3/python-syntax.vim'
 Plug 'tomtom/tcomment_vim'
 Plug 'preservim/nerdtree'
 Plug 'tpope/vim-surround'
@@ -32,13 +33,14 @@ Plug 'airblade/vim-gitgutter'
 Plug 'mileszs/ack.vim'
 Plug 'dart-lang/dart-vim-plugin'
 Plug 'tpope/vim-eunuch'
-Plug 'yegappan/taglist'
+Plug 'majutsushi/tagbar'
 Plug 'jmcantrell/vim-virtualenv'
 Plug 'mbbill/undotree'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'dense-analysis/ale'
 Plug 'maximbaz/lightline-ale'
+Plug 'Vimjas/vim-python-pep8-indent'
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'metakirby5/codi.vim'
 call plug#end()
@@ -89,11 +91,13 @@ nnoremap <silent> <leader>pt :Tags<CR>
 nnoremap <silent> <leader>pb :Buffers<CR>
 nnoremap <silent> <leader>pc :Commits<CR>
 nnoremap <silent> <leader>pcc :BCommits<CR>
+nnoremap <silent> <leader>ph :History<CR>
 nnoremap <silent> <C-p> :Files<CR>
 nnoremap <silent> <leader>d :ALEGoToDefinition<CR>
 nnoremap <silent> <leader>r :ALEFindReferences<CR>
-nnoremap <silent> <leader>e :ALENext<CR>
-
+nnoremap <silent> <leader>en :ALENext<CR>
+nnoremap <silent> <leader>ef :ALEFix<CR>
+nnoremap <silent> <leader>t :TagbarToggle<CR>
 inoremap jj <Esc>
 inoremap <C-k> <Up>
 inoremap <C-j> <Down>
@@ -130,10 +134,10 @@ set ignorecase
 set smartcase
 set clipboard=unnamedplus
 
-match Error /\%81v.\+/
+" match Error /\%81v.\+/
 set colorcolumn=80
-highlight ColorColumn ctermbg=236
-highlight signcolumn ctermbg=235
+hi ColorColumn ctermbg=236 guibg=grey19
+hi signcolumn ctermbg=235 guibg=grey17
 
 if has('persistent_undo')
     let path_to_undodir = expand('~/.vim/undo_dir/')
