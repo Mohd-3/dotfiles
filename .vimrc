@@ -4,22 +4,53 @@ set nocompatible
 set nomodeline
 set wildignore+=*/__pycache__/,*/venv/*,*/backendenv/*,*/env/*,*.pyc
 
+set updatetime=100
+set laststatus=2
+
+set number relativenumber
+set showcmd
+set wildmenu
+set showmatch
+set signcolumn=yes
+
+set winminheight=0
+set winminwidth=0
+set splitbelow
+set splitright
+
+set backspace=indent,eol,start
+set noswapfile
+set nobackup
+set nowritebackup
+set nowb
+
+set autoindent
+set smartindent
+set smarttab
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set expandtab
+
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+set clipboard=unnamedplus
+
+if $TERM == "xterm-256color"
+    set t_Co=256
+endif
+
+" if has('termguicolors')
+"     set termguicolors
+" endif
+
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
-
-let g:ale_linters = { 
-\   'python': ['pyls'],
-\}
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['isort']
-\}
-let g:ale_python_black_options  = '-S -l 79'
-let g:ale_set_highlights = 0
-let g:fzf_buffers_jump = 1
 
 call plug#begin('~/.vim/bundle')
 Plug 'cohlin/vim-colorschemes'
@@ -45,33 +76,11 @@ Plug 'Vimjas/vim-python-pep8-indent'
 " Plug 'metakirby5/codi.vim'
 call plug#end()
 
-if $TERM == "xterm-256color"
-    set t_Co=256
-endif
 set background=dark
 colorscheme py-darcula
-" if has('termguicolors')
-"     set termguicolors
-" endif
 
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
-"set runtimepath^=~/.vim/bundle/ctrlp.vim
-
-set updatetime=100
-set noshowmode
-set laststatus=2
-
-set number relativenumber
-set showcmd
-set wildmenu
-set showmatch
-set signcolumn=yes
-
-set winminheight=0
-set winminwidth=0
-set splitbelow
-set splitright
 
 let mapleader=" "
 
@@ -98,6 +107,11 @@ nnoremap <silent> <leader>r :ALEFindReferences<CR>
 nnoremap <silent> <leader>en :ALENext<CR>
 nnoremap <silent> <leader>ef :ALEFix<CR>
 nnoremap <silent> <leader>t :TagbarToggle<CR>
+nnoremap <silent> <leader>gs :G<CR>
+nnoremap <silent> <leader>gd :Gdiff<CR>
+nnoremap <silent> <leader>gb :Gblame<CR>
+nnoremap <silent> <leader>gc :Gcommit<CR>
+
 inoremap jj <Esc>
 inoremap <C-k> <Up>
 inoremap <C-j> <Down>
@@ -109,30 +123,20 @@ vnoremap <left>   xhPgvhoho
 vnoremap <Down>   xjPgvjojo
 vnoremap <Up>     xkPgvkoko
 
+let g:ale_linters = { 
+\   'python': ['pyls'],
+\}
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'python': ['isort']
+\}
+let g:ale_python_black_options  = '-S -l 79'
+let g:ale_set_highlights = 0
+let g:fzf_buffers_jump = 1
+let g:undotree_SetFocusWhenToggle = 1
 let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
 let @v = 'iclass (APIView):bbbi'
-let g:undotree_SetFocusWhenToggle = 1
-
-set backspace=indent,eol,start
-set noswapfile
-set nobackup
-set nowritebackup
-set nowb
-
-set autoindent
-set smartindent
-set smarttab
-set shiftwidth=4
-set softtabstop=4
-set tabstop=4
-set expandtab
-
-set incsearch
-set hlsearch
-set ignorecase
-set smartcase
-set clipboard=unnamedplus
 
 " match Error /\%81v.\+/
 set colorcolumn=80
@@ -147,6 +151,19 @@ if has('persistent_undo')
     let &undodir = path_to_undodir
     set undofile
 endif
+
+function! s:ZoomToggle() abort
+    if exists('t:zoomed') && t:zoomed
+        execute t:zoom_winrestcmd
+        let t:zoomed = 0
+    else
+        let t:zoom_winrestcmd = winrestcmd()
+        resize
+        vertical resize
+        let t:zoomed = 1
+    endif
+endfunction
+command! ZoomToggle call s:ZoomToggle()
 
 " inoremap <silent><expr> <TAB>
 "       \ pumvisible() ? "\<C-n>" :
@@ -172,16 +189,3 @@ endif
 " nmap <silent> gi <Plug>(coc-implementation)
 " nmap <silent> gr <Plug>(coc-references)
 " nmap <leader>rn <Plug>(coc-rename)
-
-function! s:ZoomToggle() abort
-    if exists('t:zoomed') && t:zoomed
-        execute t:zoom_winrestcmd
-        let t:zoomed = 0
-    else
-        let t:zoom_winrestcmd = winrestcmd()
-        resize
-        vertical resize
-        let t:zoomed = 1
-    endif
-endfunction
-command! ZoomToggle call s:ZoomToggle()
