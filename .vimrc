@@ -111,6 +111,7 @@ nnoremap <silent> <leader>gs :G<CR>
 nnoremap <silent> <leader>gd :Gdiff<CR>
 nnoremap <silent> <leader>gb :Gblame<CR>
 nnoremap <silent> <leader>gc :Gcommit<CR>
+nnoremap <silent> <leader>gp :Gpush<CR>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
