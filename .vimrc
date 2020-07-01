@@ -42,9 +42,15 @@ if $TERM == "xterm-256color"
     set t_Co=256
 endif
 
-" if has('termguicolors')
-"     set termguicolors
-" endif
+if has('termguicolors')
+    set termguicolors
+endif
+
+let g:lightline = {
+  \ 'colorscheme': 'onedark',
+  \ }
+
+let g:python_highlight_func_calls = 0
 
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
@@ -54,6 +60,7 @@ endif
 
 call plug#begin('~/.vim/bundle')
 Plug 'cohlin/vim-colorschemes'
+Plug 'sheerun/vim-polyglot'
 Plug 'mohd-3/lightline.vim'
 Plug 'mohd-3/python-syntax.vim'
 Plug 'tomtom/tcomment_vim'
@@ -62,7 +69,6 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 Plug 'mileszs/ack.vim'
-Plug 'dart-lang/dart-vim-plugin'
 Plug 'tpope/vim-eunuch'
 Plug 'majutsushi/tagbar'
 Plug 'jmcantrell/vim-virtualenv'
@@ -72,12 +78,15 @@ Plug 'junegunn/fzf.vim'
 Plug 'dense-analysis/ale'
 Plug 'maximbaz/lightline-ale'
 Plug 'Vimjas/vim-python-pep8-indent'
+Plug 'mhinz/vim-startify'
+Plug 'joshdick/onedark.vim'
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'metakirby5/codi.vim'
 call plug#end()
 
 set background=dark
-colorscheme py-darcula
+" colorscheme py-darcula
+colorscheme onedark
 
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
@@ -112,6 +121,7 @@ nnoremap <silent> <leader>gd :Gdiff<CR>
 nnoremap <silent> <leader>gb :Gblame<CR>
 nnoremap <silent> <leader>gc :Gcommit<CR>
 nnoremap <silent> <leader>gp :Gpush<CR>
+nnoremap <silent> <leader>z :term<CR><C-w>N:resize 10<CR>i
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
@@ -138,11 +148,11 @@ let g:undotree_SetFocusWhenToggle = 1
 let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
 let @v = 'iclass (APIView):bbbi'
-
 " match Error /\%81v.\+/
+
 set colorcolumn=80
-hi ColorColumn ctermbg=236 guibg=grey19
-hi signcolumn ctermbg=235 guibg=grey17
+" hi ColorColumn ctermbg=236 guibg=grey19
+hi clear SignColumn
 
 if has('persistent_undo')
     let path_to_undodir = expand('~/.vim/undo_dir/')
@@ -165,6 +175,26 @@ function! s:ZoomToggle() abort
     endif
 endfunction
 command! ZoomToggle call s:ZoomToggle()
+
+function! s:gitModified()
+    let files = systemlist('git ls-files -m 2>/dev/null')
+    return map(files, "{'line': v:val, 'path': v:val}")
+endfunction
+
+function! s:gitUntracked()
+    let files = systemlist('git ls-files -o --exclude-standard 2>/dev/null')
+    return map(files, "{'line': v:val, 'path': v:val}")
+endfunction
+
+let g:startify_lists = [
+        \ { 'type': 'files',     'header': ['   MRU']            },
+        \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
+        \ { 'type': 'sessions',  'header': ['   Sessions']       },
+        \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
+        \ { 'type': function('s:gitModified'),  'header': ['   git modified']},
+        \ { 'type': function('s:gitUntracked'), 'header': ['   git untracked']},
+        \ { 'type': 'commands',  'header': ['   Commands']       },
+        \ ]
 
 " inoremap <silent><expr> <TAB>
 "       \ pumvisible() ? "\<C-n>" :
