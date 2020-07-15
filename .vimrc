@@ -62,7 +62,7 @@ call plug#begin('~/.vim/bundle')
 Plug 'cohlin/vim-colorschemes'
 Plug 'sheerun/vim-polyglot'
 Plug 'mohd-3/lightline.vim'
-Plug 'mohd-3/python-syntax.vim'
+" Plug 'mohd-3/python-syntax.vim'
 Plug 'tomtom/tcomment_vim'
 Plug 'preservim/nerdtree'
 Plug 'tpope/vim-surround'
@@ -80,6 +80,7 @@ Plug 'maximbaz/lightline-ale'
 Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'mhinz/vim-startify'
 Plug 'joshdick/onedark.vim'
+Plug 'jacoborus/tender.vim'
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'metakirby5/codi.vim'
 call plug#end()
@@ -139,7 +140,8 @@ let g:ale_linters = {
 \}
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['isort']
+\   'python': ['isort'],
+\   'html': ['html-beautify']
 \}
 let g:ale_python_black_options  = '-S -l 79'
 let g:ale_set_highlights = 0
