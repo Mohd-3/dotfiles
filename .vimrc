@@ -58,7 +58,7 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-call plug#begin('~/.vim/bundle')
+call plug#begin()
 Plug 'cohlin/vim-colorschemes'
 Plug 'sheerun/vim-polyglot'
 Plug 'mohd-3/lightline.vim'
@@ -81,6 +81,11 @@ Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'mhinz/vim-startify'
 Plug 'joshdick/onedark.vim'
 Plug 'jacoborus/tender.vim'
+Plug 'dart-lang/dart-vim-plugin'
+Plug 'thosakwe/vim-flutter'
+Plug 'natebosch/vim-lsc'
+Plug 'natebosch/vim-lsc-dart'
+Plug 'ackyshake/VimCompletesMe'
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'metakirby5/codi.vim'
 call plug#end()
@@ -89,10 +94,26 @@ set background=dark
 " colorscheme py-darcula
 colorscheme onedark
 
+set completeopt-=preview
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
 
 let mapleader=" "
+let g:lsc_auto_map = {
+    \ 'GoToDefinition': '<leader>d',
+    \ 'FindReferences': '<leader>r',
+    \ 'FindCodeActions': '<leader>ga',
+    \ 'Rename': '<leader>R',
+    \ 'ShowHover': v:true,
+    \ 'SignatureHelp': '<leader>s',
+    \ 'Completion': 'completefunc',
+    \}
+    " \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
+    " \ 'FindImplementations': '<leader>I',
+    " \ 'DocumentSymbol': 'go',
+    " \ 'WorkspaceSymbol': 'gS',
+    " \ 'NextReference': '<C-n>',
+    " \ 'PreviousReference': '<C-p>',
 
 nnoremap j gj
 nnoremap k gk
@@ -112,17 +133,24 @@ nnoremap <silent> <leader>pc :Commits<CR>
 nnoremap <silent> <leader>pcc :BCommits<CR>
 nnoremap <silent> <leader>ph :History<CR>
 nnoremap <silent> <C-p> :Files<CR>
-nnoremap <silent> <leader>d :ALEGoToDefinition<CR>
-nnoremap <silent> <leader>r :ALEFindReferences<CR>
+" nnoremap <silent> <leader>d :ALEGoToDefinition<CR>
+" nnoremap <silent> <leader>r :ALEFindReferences<CR>
 nnoremap <silent> <leader>en :ALENext<CR>
 nnoremap <silent> <leader>ef :ALEFix<CR>
 nnoremap <silent> <leader>t :TagbarToggle<CR>
 nnoremap <silent> <leader>gs :G<CR>
-nnoremap <silent> <leader>gd :Gdiff<CR>
-nnoremap <silent> <leader>gb :Gblame<CR>
-nnoremap <silent> <leader>gc :Gcommit<CR>
-nnoremap <silent> <leader>gp :Gpush<CR>
+nnoremap <silent> <leader>gd :Git diff<CR>
+nnoremap <silent> <leader>gb :Git blame<CR>
+nnoremap <silent> <leader>gc :Git commit<CR>
+nnoremap <silent> <leader>gp :Git push<CR>
 nnoremap <silent> <leader>z :term<CR><C-w>N:resize 10<CR>i
+nnoremap <silent> <leader>fz :resize 10<CR>
+nnoremap <leader>fa :FlutterRun<cr>
+nnoremap <leader>fq :FlutterQuit<cr>
+nnoremap <leader>fr :FlutterHotReload<cr>
+nnoremap <leader>fR :FlutterHotRestart<cr>
+nnoremap <leader>fD :FlutterVisualDebug<cr>
+nnoremap <leader>c :set cuc!<CR>
 
 inoremap jj <Esc>
 inoremap <C-k> <Up>
@@ -135,14 +163,30 @@ vnoremap <left>   xhPgvhoho
 vnoremap <Down>   xjPgvjojo
 vnoremap <Up>     xkPgvkoko
 
+" let g:lsc_server_commands = {
+" \ 'python': 'pyls',
+" \ 'vim' : {
+" \   'name': 'vim-language-server',
+" \   'command': 'vim-language-server --stdio',
+" \      'message_hooks': {
+" \          'initialize': {
+" \              'initializationOptions': { 'vimruntime': $VIMRUNTIME, 'runtimepath': &rtp },
+" \         },
+" \      },
+" \   },
+" \}
+
 let g:ale_linters = { 
 \   'python': ['pyls'],
+\   'dart': ['analysis_server'],
 \}
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['isort'],
-\   'html': ['html-beautify']
+\   'python': ['isort', 'remove_trailing_lines', 'trim_whitespace'],
+\   'html': ['html-beautify'],
+\   'dart': ['dart-format', 'remove_trailing_lines', 'trim_whitespace']
 \}
+
 let g:ale_python_black_options  = '-S -l 79'
 let g:ale_set_highlights = 0
 let g:fzf_buffers_jump = 1
@@ -197,6 +241,9 @@ let g:startify_lists = [
         \ { 'type': function('s:gitUntracked'), 'header': ['   git untracked']},
         \ { 'type': 'commands',  'header': ['   Commands']       },
         \ ]
+
+
+:autocmd InsertEnter,InsertLeave * set cul!
 
 " inoremap <silent><expr> <TAB>
 "       \ pumvisible() ? "\<C-n>" :
