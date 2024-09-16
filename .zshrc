@@ -1,23 +1,26 @@
-alias python=python3
-alias tmux='tmux -2'
-#alias pip=pip3
-alias touchoff='xinput --set-prop 14 "Device Enabled" 0'
-alias touchon='xinput --set-prop 14 "Device Enabled" 1'
-alias flutter='/home/mad/Downloads/flutter/bin/flutter'
-export TERM=xterm-256color
-[[ $- != *i* ]] && return
-[[ -z "$TMUX" ]] && exec tmux
+# export TERM=xterm-256color
+# [[ $- != *i* ]] && return
+# [[ -z "$TMUX" ]] && exec tmux
+#
+export ZSH=/home/mohd/.oh-my-zsh
+export PATH=$HOME/flutter/bin:$PATH
 
-export ZSH=/home/mad/.oh-my-zsh
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 ZSH_THEME="fwalch"
 plugins=(git)
+
 source $ZSH/oh-my-zsh.sh
+source $HOME/.variables
 
 ggg() {
     g++ -std=c++17 "$1" -o "$2"
 }
 
 bindkey -v
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 

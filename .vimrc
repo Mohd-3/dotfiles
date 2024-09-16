@@ -59,7 +59,7 @@ if empty(glob('~/.vim/autoload/plug.vim'))
 endif
 
 call plug#begin()
-Plug 'cohlin/vim-colorschemes'
+Plug 'nordtheme/vim'
 Plug 'sheerun/vim-polyglot'
 Plug 'mohd-3/lightline.vim'
 " Plug 'mohd-3/python-syntax.vim'
@@ -85,16 +85,15 @@ Plug 'dart-lang/dart-vim-plugin'
 Plug 'thosakwe/vim-flutter'
 Plug 'natebosch/vim-lsc'
 Plug 'natebosch/vim-lsc-dart'
-Plug 'ackyshake/VimCompletesMe'
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" Plug 'metakirby5/codi.vim'
+Plug 'vim-scripts/VimCompletesMe'
 call plug#end()
 
 set background=dark
-" colorscheme py-darcula
 colorscheme onedark
+" colorscheme nord
 
-set completeopt-=preview
+set completeopt=menu,menuone,preview,noselect,noinsert
+autocmd CompleteDone * silent! pclose
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
 
@@ -105,10 +104,10 @@ let g:lsc_auto_map = {
     \ 'FindCodeActions': '<leader>ga',
     \ 'Rename': '<leader>R',
     \ 'ShowHover': v:true,
-    \ 'SignatureHelp': '<leader>s',
+    \ 'SignatureHelp': '<leader>sh',
     \ 'Completion': 'completefunc',
+    \ 'GoToDefinitionSplit': '<leader>sd',
     \}
-    " \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
     " \ 'FindImplementations': '<leader>I',
     " \ 'DocumentSymbol': 'go',
     " \ 'WorkspaceSymbol': 'gS',
@@ -163,26 +162,27 @@ vnoremap <left>   xhPgvhoho
 vnoremap <Down>   xjPgvjojo
 vnoremap <Up>     xkPgvkoko
 
-" let g:lsc_server_commands = {
-" \ 'python': 'pyls',
-" \ 'vim' : {
-" \   'name': 'vim-language-server',
-" \   'command': 'vim-language-server --stdio',
-" \      'message_hooks': {
-" \          'initialize': {
-" \              'initializationOptions': { 'vimruntime': $VIMRUNTIME, 'runtimepath': &rtp },
-" \         },
-" \      },
-" \   },
-" \}
+let g:lsc_server_commands = {
+\ 'python': 'pylsp',
+\ 'vim' : {
+\   'name': 'vim-language-server',
+\   'command': 'vim-language-server --stdio',
+\      'message_hooks': {
+\          'initialize': {
+\              'initializationOptions': { 'vimruntime': $VIMRUNTIME, 'runtimepath': &rtp },
+\         },
+\      },
+\   },
+\}
+
 
 let g:ale_linters = { 
-\   'python': ['pyls'],
+\   'python': ['pylsp'],
 \   'dart': ['analysis_server'],
 \}
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['isort', 'remove_trailing_lines', 'trim_whitespace'],
+\   'python': ['isort', 'remove_trailing_lines', 'trim_whitespace', 'autoimport', 'autoflake'],
 \   'html': ['html-beautify'],
 \   'dart': ['dart-format', 'remove_trailing_lines', 'trim_whitespace']
 \}
@@ -191,15 +191,17 @@ let g:ale_python_black_options  = '-S -l 79'
 let g:ale_set_highlights = 0
 let g:fzf_buffers_jump = 1
 let g:undotree_SetFocusWhenToggle = 1
+let g:lsc_enable_autocomplete = v:true
+let g:lsc_enable_diagnostics   = v:false
+let g:lsc_reference_highlights = v:false
+let g:lsc_trace_level          = 'off'
+
 let @m = 'iclass (models.Model):bbbbbi'
 let @s = 'iclass (serializers.Serializer):bbbbbi'
 let @v = 'iclass (APIView):bbbi'
-" match Error /\%81v.\+/
 
 set colorcolumn=80
-" hi ColorColumn ctermbg=236 guibg=grey19
 hi clear SignColumn
-
 if has('persistent_undo')
     let path_to_undodir = expand('~/.vim/undo_dir/')
     if !isdirectory(path_to_undodir)
@@ -220,6 +222,7 @@ function! s:ZoomToggle() abort
         let t:zoomed = 1
     endif
 endfunction
+
 command! ZoomToggle call s:ZoomToggle()
 
 function! s:gitModified()
@@ -242,30 +245,12 @@ let g:startify_lists = [
         \ { 'type': 'commands',  'header': ['   Commands']       },
         \ ]
 
-
 :autocmd InsertEnter,InsertLeave * set cul!
 
-" inoremap <silent><expr> <TAB>
-"       \ pumvisible() ? "\<C-n>" :
-"       \ <SID>check_back_space() ? "\<TAB>" :
-"       \ coc#refresh()
-" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-" function! s:check_back_space() abort
-"   let col = col('.') - 1
-"   return !col || getline('.')[col - 1]  =~# '\s'
-" endfunction
-
-" inoremap <silent><expr> <c-space> coc#refresh()
-" if exists('*complete_info')
-"   inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
-" else
-"   inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-" endif
-" nmap <silent> [g <Plug>(coc-diagnostic-prev)
-" nmap <silent> ]g <Plug>(coc-diagnostic-next)
-" nmap <silent> gd <Plug>(coc-definition)
-" nmap <silent> gy <Plug>(coc-type-definition)
-" nmap <silent> gi <Plug>(coc-implementation)
-" nmap <silent> gr <Plug>(coc-references)
-" nmap <leader>rn <Plug>(coc-rename)
+inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+      \ ? '<C-N>' : '<Tab>'
+inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
+      \ ? '<C-P>' : '<Tab>'
+autocmd CmdwinEnter * inoremap <expr> <buffer> <Tab>
+      \ getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+      \ ? '<C-X><C-V>' : '<Tab>'
