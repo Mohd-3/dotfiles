@@ -3,6 +3,7 @@ set hidden
 set nocompatible
 set nomodeline
 set wildignore+=*/__pycache__/,*/venv/*,*/backendenv/*,*/env/*,*.pyc
+set noshowmode
 
 set updatetime=100
 set laststatus=2
@@ -86,14 +87,15 @@ Plug 'thosakwe/vim-flutter'
 Plug 'natebosch/vim-lsc'
 Plug 'natebosch/vim-lsc-dart'
 Plug 'vim-scripts/VimCompletesMe'
+Plug 'github/copilot.vim'
 call plug#end()
 
 set background=dark
 colorscheme onedark
 " colorscheme nord
 
-set completeopt=menu,menuone,preview,noselect,noinsert
-autocmd CompleteDone * silent! pclose
+set completeopt=menu,menuone,noselect,noinsert
+" autocmd CompleteDone * silent! pclose
 "autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 "autocmd vimenter * NERDTree
 
@@ -246,6 +248,8 @@ let g:startify_lists = [
         \ ]
 
 :autocmd InsertEnter,InsertLeave * set cul!
+
+autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | call feedkeys(":quit\<CR>:\<BS>") | endif
 
 inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
       \ ? '<C-N>' : '<Tab>'
