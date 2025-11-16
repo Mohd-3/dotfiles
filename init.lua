@@ -235,7 +235,11 @@ require('lazy').setup({
         end,
         priority = 1000,
     },
-    { 'tpope/vim-surround' },
+    {
+        'kylechui/nvim-surround',
+        event = 'VeryLazy',
+        opts = {},
+    },
     { 'nvim-tree/nvim-web-devicons' },
     {
         'folke/noice.nvim',
@@ -519,11 +523,6 @@ require('lazy').setup({
         keys = {
             { '-', '<Cmd>Oil<CR>', desc = 'Browse files from here' },
         },
-    },
-    {
-        'https://github.com/numToStr/Comment.nvim',
-        event = 'VeryLazy',
-        opts = {},
     },
     {
         'https://github.com/tpope/vim-sleuth',
