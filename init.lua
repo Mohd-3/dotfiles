@@ -2,6 +2,7 @@ vim.opt.signcolumn = 'yes'
 vim.opt.updatetime = 250
 vim.opt.timeoutlen = 300
 vim.opt.scrolloff = 8
+vim.opt.showmode = false
 -- vim.opt.confirm = true
 vim.opt.inccommand = 'split'
 vim.opt.termguicolors = true
@@ -137,7 +138,7 @@ require('lazy').setup({
     {
         'akinsho/toggleterm.nvim',
         version = '*',
-        config = true,
+        opts = {},
         keys = {
 
             { '<leader>zz', '<cmd>ToggleTerm direction=float<CR>', noremap = true, silent = true },
@@ -155,77 +156,78 @@ require('lazy').setup({
                 topdelete = { text = '‾' },
                 changedelete = { text = '~' },
             },
-        },
-        config = function()
-            require('gitsigns').setup({
-                on_attach = function(bufnr)
-                    local gitsigns = require('gitsigns')
+            on_attach = function(bufnr)
+                local gitsigns = require('gitsigns')
 
-                    local function map(mode, l, r, opts)
-                        opts = opts or {}
-                        opts.buffer = bufnr
-                        vim.keymap.set(mode, l, r, opts)
+                local function map(mode, l, r, opts)
+                    opts = opts or {}
+                    opts.buffer = bufnr
+                    vim.keymap.set(mode, l, r, opts)
+                end
+
+                -- Navigation
+                map('n', ']c', function()
+                    if vim.wo.diff then
+                        vim.cmd.normal({ ']c', bang = true })
+                    else
+                        gitsigns.nav_hunk('next')
                     end
+                end)
 
-                    -- Navigation
-                    map('n', ']c', function()
-                        if vim.wo.diff then
-                            vim.cmd.normal({ ']c', bang = true })
-                        else
-                            gitsigns.nav_hunk('next')
-                        end
-                    end)
+                map('n', '[c', function()
+                    if vim.wo.diff then
+                        vim.cmd.normal({ '[c', bang = true })
+                    else
+                        gitsigns.nav_hunk('prev')
+                    end
+                end)
 
-                    map('n', '[c', function()
-                        if vim.wo.diff then
-                            vim.cmd.normal({ '[c', bang = true })
-                        else
-                            gitsigns.nav_hunk('prev')
-                        end
-                    end)
+                -- Actions
+                map('n', '<leader>hs', gitsigns.stage_hunk)
+                map('n', '<leader>hr', gitsigns.reset_hunk)
 
-                    -- Actions
-                    map('n', '<leader>hs', gitsigns.stage_hunk)
-                    map('n', '<leader>hr', gitsigns.reset_hunk)
+                map('v', '<leader>hs', function()
+                    gitsigns.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') })
+                end)
 
-                    map('v', '<leader>hs', function()
-                        gitsigns.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') })
-                    end)
+                map('v', '<leader>hr', function()
+                    gitsigns.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') })
+                end)
 
-                    map('v', '<leader>hr', function()
-                        gitsigns.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') })
-                    end)
+                map('n', '<leader>hS', gitsigns.stage_buffer)
+                map('n', '<leader>hR', gitsigns.reset_buffer)
+                map('n', '<leader>hp', gitsigns.preview_hunk)
+                map('n', '<leader>hi', gitsigns.preview_hunk_inline)
 
-                    map('n', '<leader>hS', gitsigns.stage_buffer)
-                    map('n', '<leader>hR', gitsigns.reset_buffer)
-                    map('n', '<leader>hp', gitsigns.preview_hunk)
-                    map('n', '<leader>hi', gitsigns.preview_hunk_inline)
+                map('n', '<leader>hb', function()
+                    gitsigns.blame_line({ full = true })
+                end)
 
-                    map('n', '<leader>hb', function()
-                        gitsigns.blame_line({ full = true })
-                    end)
+                map('n', '<leader>hd', gitsigns.diffthis)
 
-                    map('n', '<leader>hd', gitsigns.diffthis)
+                map('n', '<leader>hD', function()
+                    gitsigns.diffthis('~')
+                end)
 
-                    map('n', '<leader>hD', function()
-                        gitsigns.diffthis('~')
-                    end)
+                map('n', '<leader>hQ', function()
+                    gitsigns.setqflist('all')
+                end)
+                map('n', '<leader>hq', gitsigns.setqflist)
 
-                    map('n', '<leader>hQ', function()
-                        gitsigns.setqflist('all')
-                    end)
-                    map('n', '<leader>hq', gitsigns.setqflist)
+                -- Toggles
+                map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
+                map('n', '<leader>tw', gitsigns.toggle_word_diff)
 
-                    -- Toggles
-                    map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
-                    map('n', '<leader>tw', gitsigns.toggle_word_diff)
-
-                    -- Text object
-                    map({ 'o', 'x' }, 'ih', gitsigns.select_hunk)
-                end,
-            })
-        end,
+                -- Text object
+                map({ 'o', 'x' }, 'ih', gitsigns.select_hunk)
+            end,
+        },
     },
+    -- {
+    --     'rmehri01/onenord.nvim',
+    --     opts = {},
+    --     priority = 1000,
+    -- },
     {
         'joshdick/onedark.vim',
         config = function()
@@ -238,29 +240,62 @@ require('lazy').setup({
     {
         'folke/noice.nvim',
         event = 'VeryLazy',
-        opts = {},
         dependencies = {
             'MunifTanjim/nui.nvim',
             'rcarriga/nvim-notify',
         },
-        config = function()
-            require('noice').setup({
-                lsp = {
-                    override = {
-                        ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
-                        ['vim.lsp.util.stylize_markdown'] = true,
-                        ['cmp.entry.get_documentation'] = true,
+        opts = {
+            lsp = {
+                override = {
+                    ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+                    ['vim.lsp.util.stylize_markdown'] = true,
+                    ['cmp.entry.get_documentation'] = true,
+                },
+            },
+            presets = {
+                bottom_search = false,
+                command_palette = false,
+                long_message_to_split = false,
+                inc_rename = false,
+                lsp_doc_border = false,
+            },
+            routes = {
+                {
+                    view = 'notify',
+                    filter = { event = 'msg_showmode' },
+                },
+            },
+            views = {
+                cmdline_popup = {
+                    position = {
+                        row = 5,
+                        col = '50%',
+                    },
+                    size = {
+                        width = 60,
+                        height = 'auto',
                     },
                 },
-                presets = {
-                    bottom_search = true,
-                    -- command_palette = true,
-                    long_message_to_split = true,
-                    inc_rename = false,
-                    lsp_doc_border = false,
+                popupmenu = {
+                    relative = 'editor',
+                    position = {
+                        row = 8,
+                        col = '50%',
+                    },
+                    size = {
+                        width = 60,
+                        height = 10,
+                    },
+                    border = {
+                        style = 'rounded',
+                        padding = { 0, 1 },
+                    },
+                    win_options = {
+                        winhighlight = { Normal = 'Normal', FloatBorder = 'DiagnosticInfo' },
+                    },
                 },
-            })
-        end,
+            },
+        },
     },
     { 'neovim/nvim-lspconfig' },
     {
@@ -331,8 +366,6 @@ require('lazy').setup({
                 desc = 'Format buffer',
             },
         },
-        ---@module "conform"
-        ---@type conform.setupOpts
         opts = {
             formatters_by_ft = {
                 lua = { 'stylua' },
@@ -372,105 +405,72 @@ require('lazy').setup({
         dependencies = {
             'nvim-lua/plenary.nvim',
         },
-        config = function()
-            require('claude-code').setup({
-                window = {
-                    position = 'float',
-                    float = {
-                        width = '90%',
-                        height = '90%',
-                        row = 'center',
-                        col = 'center',
-                        relative = 'editor',
-                        border = 'double',
-                    },
+        opts = {
+            window = {
+                position = 'float',
+                float = {
+                    width = '90%',
+                    height = '90%',
+                    row = 'center',
+                    col = 'center',
+                    relative = 'editor',
+                    border = 'single',
                 },
-            })
-        end,
+            },
+        },
         keys = {
             { '<leader>cc', '<cmd>ClaudeCode<CR>', desc = 'Toggle Claude Code' },
             { '<leader>cr', '<cmd>ClaudeCodeContinue<CR>', desc = 'Toggle Claude Code Coninue' },
         },
     },
     {
+        'johnseth97/codex.nvim',
+        lazy = true,
+        cmd = { 'Codex', 'CodexToggle' },
+        keys = {
+            {
+                '<leader>cd',
+                function()
+                    require('codex').toggle()
+                end,
+                desc = 'Toggle Codex popup',
+                mode = { 'n', 't' },
+            },
+        },
+        opts = {
+            keymaps = {
+                toggle = nil,
+                quit = '<C-q>',
+            },
+            border = 'rounded',
+            width = 0.8,
+            height = 0.8,
+            model = nil,
+            autoinstall = true,
+        },
+    },
+    {
         'zbirenbaum/copilot.lua',
         cmd = 'Copilot',
         event = 'InsertEnter',
-        config = function()
-            require('copilot').setup({
-                panel = {
-                    enabled = true,
-                    auto_refresh = false,
-                    keymap = {
-                        jump_prev = '[[',
-                        jump_next = ']]',
-                        accept = '<CR>',
-                        refresh = 'gr',
-                        open = '<M-CR>',
-                    },
-                    layout = {
-                        position = 'right',
-                        ratio = 0.4,
-                    },
+        opts = {
+            panel = {
+                layout = {
+                    position = 'right',
+                    ratio = 0.4,
                 },
-                suggestion = {
-                    enabled = true,
-                    auto_trigger = false,
-                    hide_during_completion = true,
-                    debounce = 75,
-                    trigger_on_accept = true,
-                    keymap = {
-                        accept = '<Tab>',
-                        accept_word = false,
-                        accept_line = false,
-                        next = '<M-]>',
-                        prev = '<M-[>',
-                        dismiss = '<C-]>',
-                    },
+            },
+            suggestion = {
+                keymap = {
+                    accept = '<Tab>',
+                    accept_word = false,
+                    accept_line = false,
+                    next = '<M-]>',
+                    prev = '<M-[>',
+                    dismiss = '<C-]>',
                 },
-                nes = {
-                    enabled = false,
-                    auto_trigger = false,
-                    keymap = {
-                        accept_and_goto = false,
-                        accept = false,
-                        dismiss = false,
-                    },
-                },
-                auth_provider_url = nil,
-                logger = {
-                    file = vim.fn.stdpath('log') .. '/copilot-lua.log',
-                    file_log_level = vim.log.levels.OFF,
-                    print_log_level = vim.log.levels.WARN,
-                    trace_lsp = 'off',
-                    trace_lsp_progress = false,
-                    log_lsp_messages = false,
-                },
-                copilot_node_command = 'node',
-                workspace_folders = {},
-                copilot_model = '',
-                disable_limit_reached_message = false,
-                root_dir = function()
-                    return vim.fs.dirname(vim.fs.find('.git', { upward = true })[1])
-                end,
-                should_attach = function(_, _)
-                    if not vim.bo.buflisted then
-                        return false
-                    end
-
-                    if vim.bo.buftype ~= '' then
-                        return false
-                    end
-
-                    return true
-                end,
-                server = {
-                    type = 'nodejs',
-                    custom_server_filepath = nil,
-                },
-                server_opts_overrides = {},
-            })
-        end,
+            },
+        },
     },
     {
         'stevearc/oil.nvim',
@@ -523,9 +523,7 @@ require('lazy').setup({
     {
         'https://github.com/numToStr/Comment.nvim',
         event = 'VeryLazy',
-        config = function()
-            require('Comment').setup()
-        end,
+        opts = {},
     },
     {
         'https://github.com/tpope/vim-sleuth',
@@ -551,9 +549,7 @@ require('lazy').setup({
     {
         'https://github.com/nvim-lualine/lualine.nvim',
         event = 'VeryLazy',
-        config = function()
-            require('lualine').setup()
-        end,
+        opts = {},
     },
     {
         'mason-org/mason.nvim',
@@ -586,11 +582,20 @@ require('lazy').setup({
     {
         'nvim-flutter/flutter-tools.nvim',
         lazy = false,
+        opts = {
+            defaults = {
+                file_ignore_patterns = {
+                    'node_modules',
+                    '.git/',
+                    '__pycache__/',
+                    'env/',
+                },
+            },
+        },
         dependencies = {
             'nvim-lua/plenary.nvim',
             'stevearc/dressing.nvim',
         },
-        config = true,
         keys = {
             { '<leader>fa', ':FlutterRun<CR>', noremap = true, silent = true },
             { '<leader>fr', ':FlutterReload<CR>', noremap = true, silent = true },
@@ -604,84 +609,74 @@ require('lazy').setup({
         'nvim-telescope/telescope.nvim',
         tag = '0.1.8',
         dependencies = { 'nvim-lua/plenary.nvim' },
-        config = function()
-            require('telescope').setup({
-                defaults = {
-                    file_ignore_patterns = {
-                        'node_modules',
-                        '.git/',
-                        '__pycache__/',
-                        'env/',
-                    },
-                },
-            })
-            require('telescope').load_extension('flutter')
-        end,
     },
     {
         'nvim-treesitter/nvim-treesitter',
         branch = 'master',
         lazy = false,
         build = ':TSUpdate',
-        config = function()
-            require('nvim-treesitter.configs').setup({
-                ensure_installed = {
-                    'python',
-                    'lua',
-                    'dart',
-                    'javascript',
-                    'typescript',
-                    'html',
-                    'htmldjango',
-                    'css',
-                    'c_sharp',
-                    'dockerfile',
-                    'cpp',
-                    'json',
-                    'bash',
-                    'vue',
-                    'vim',
-                    'yaml',
-                },
-                highlight = {
-                    enable = true,
-                },
-            })
-        end,
+        opts = {
+            ensure_installed = {
+                'python',
+                'lua',
+                'dart',
+                'javascript',
+                'typescript',
+                'html',
+                'htmldjango',
+                'css',
+                'c_sharp',
+                'dockerfile',
+                'cpp',
+                'json',
+                'bash',
+                'vue',
+                'vim',
+                'yaml',
+            },
+            highlight = {
+                enable = true,
+            },
+        },
     },
     {
         'nyngwang/NeoZoom.lua',
-        config = function()
-            require('neo-zoom').setup({
-                popup = { enabled = true },
-                winopts = {
-                    offset = {
-                        width = 150,
-                        height = 0.85,
-                    },
-                    border = 'thicc',
+        opts = {
+            popup = { enabled = true },
+            winopts = {
+                offset = {
+                    width = 150,
+                    height = 0.85,
                 },
-                presets = {
-                    {
-                        filetypes = { 'dapui_.*', 'dap-repl' },
-                        winopts = {
-                            offset = { top = 0.02, left = 0.26, width = 0.74, height = 0.25 },
-                        },
-                    },
-                    {
-                        filetypes = { 'markdown' },
-                        callbacks = {
-                            function()
-                                vim.wo.wrap = true
-                            end,
-                        },
+                border = 'thicc',
+            },
+            presets = {
+                {
+                    filetypes = { 'dapui_.*', 'dap-repl' },
+                    winopts = {
+                        offset = { top = 0.02, left = 0.26, width = 0.74, height = 0.25 },
                     },
                 },
-            })
-            vim.keymap.set('n', '<CR>', function()
-                vim.cmd('NeoZoomToggle')
-            end, { silent = true, nowait = true })
-        end,
+                {
+                    filetypes = { 'markdown' },
+                    callbacks = {
+                        function()
+                            vim.wo.wrap = true
+                        end,
+                    },
+                },
+            },
+        },
+        keys = {
+            {
+                '<CR>',
+                function()
+                    vim.cmd('NeoZoomToggle')
+                end,
+                silent = true,
+                nowait = true,
+            },
+        },
     },
     {
         'folke/which-key.nvim',
@@ -716,6 +711,8 @@ local enabled_servers = { 'pylsp', 'html-lsp', 'vue_lsp', 'lua_ls', 'djls', 'css
 for _, server in ipairs(enabled_servers) do
     vim.lsp.enable(server)
 end
+
+require('codex').status()
 
 local builtin = require('telescope.builtin')
 
