@@ -85,6 +85,14 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     end,
 })
 
+vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+    pattern = { '/var/log/*' },
+    desc = 'Set log file settings',
+    callback = function()
+        vim.bo.filetype = 'log'
+        vim.bo.undofile = false
+    end,
+})
 function _G.get_oil_winbar()
     local bufnr = vim.api.nvim_win_get_buf(vim.g.statusline_winid)
     local dir = require('oil').get_current_dir(bufnr)
@@ -167,12 +175,59 @@ require('lazy').setup({
         opts = {},
     },
     {
+        'AckslD/nvim-neoclip.lua',
+        dependencies = {
+            { 'nvim-telescope/telescope.nvim' },
+        },
+        opts = {},
+        keys = {
+            { '<leader>y', '<cmd>Telescope registers<CR>' },
+        },
+    },
+    {
+        'chentoast/marks.nvim',
+        event = 'VeryLazy',
+        opts = {},
+    },
+    {
+        'zeioth/garbage-day.nvim',
+        dependencies = {
+            { 'neovim/nvim-lspconfig' },
+        },
+        -- lazy = false,
+        event = 'VeryLazy',
+        opts = {},
+    },
+    {
         'iamcco/markdown-preview.nvim',
         cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
         ft = { 'markdown' },
         build = function()
             vim.fn['mkdp#util#install']()
         end,
+        keys = {
+            { '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>', desc = 'Toggle Markdown Preview' },
+        },
+    },
+    {
+        's1n7ax/nvim-search-and-replace',
+        opts = {
+            ignore = {
+                '**/node_modules/**',
+                '**/.git/**',
+                '**/.gitignore',
+                '**/.gitmodules',
+                'build/**',
+                'env/**',
+                '**/migrations/**',
+                '**/*.pyc',
+            },
+            update_changes = false,
+            replace_keymap = '<leader>sr',
+            replace_all_keymap = '<leader>sR',
+            replace_and_save_keymap = '<leader>su',
+            replace_all_and_save_keymap = '<leader>sU',
+        },
     },
     {
         'lewis6991/gitsigns.nvim',
@@ -242,11 +297,9 @@ require('lazy').setup({
                 end)
                 map('n', '<leader>hq', gitsigns.setqflist)
 
-                -- Toggles
                 map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
                 map('n', '<leader>tw', gitsigns.toggle_word_diff)
 
-                -- Text object
                 map({ 'o', 'x' }, 'ih', gitsigns.select_hunk)
             end,
         },
@@ -329,7 +382,10 @@ require('lazy').setup({
             },
         },
     },
-    { 'neovim/nvim-lspconfig' },
+    {
+        'neovim/nvim-lspconfig',
+        lazy = false,
+    },
     {
         'hrsh7th/nvim-cmp',
         dependencies = {
@@ -362,6 +418,8 @@ require('lazy').setup({
                             cmp.select_next_item()
                         -- elseif luasnip.locally_jumpable(1) then
                         --   luasnip.jump(1)
+                        elseif require('copilot.suggestion').is_visible() then
+                            require('copilot.suggestion').accept()
                         else
                             fallback()
                         end
@@ -372,6 +430,8 @@ require('lazy').setup({
                             cmp.select_prev_item()
                         -- elseif luasnip.locally_jumpable(-1) then
                         --   luasnip.jump(-1)
+                        elseif require('copilot.suggestion').is_visible() then
+                            require('copilot.suggestion').dismiss()
                         else
                             fallback()
                         end
@@ -380,8 +440,16 @@ require('lazy').setup({
                 sources = cmp.config.sources({
                     { name = 'nvim_lsp' },
                     { name = 'buffer' },
+                    { name = 'path' },
                 }),
             })
+            cmp.event:on('menu_opened', function()
+                vim.b.copilot_suggestion_hidden = true
+            end)
+
+            cmp.event:on('menu_closed', function()
+                vim.b.copilot_suggestion_hidden = false
+            end)
         end,
     },
     {
@@ -505,7 +573,7 @@ require('lazy').setup({
             },
             suggestion = {
                 keymap = {
-                    accept = '<Tab>',
+                    accept = '<M-o>',
                     accept_word = false,
                     accept_line = false,
                     next = '<M-]>',
@@ -514,6 +582,23 @@ require('lazy').setup({
                 },
             },
         },
+    },
+    {
+        'rest-nvim/rest.nvim',
+        dependencies = {
+            'nvim-treesitter/nvim-treesitter',
+            opts = function(_, opts)
+                opts.ensure_installed = opts.ensure_installed or {}
+                table.insert(opts.ensure_installed, 'http')
+            end,
+            keys = {
+                { '<leader>pe', '<cmd>lua require("telescope").extensions.rest.select_env()<CR>' },
+            },
+        },
+    },
+    {
+        'fei6409/log-highlight.nvim',
+        opts = {},
     },
     {
         'stevearc/oil.nvim',
@@ -645,9 +730,51 @@ require('lazy').setup({
     },
     {
         'nvim-telescope/telescope.nvim',
-        tag = '0.1.8',
-        dependencies = { 'nvim-lua/plenary.nvim' },
+        tag = '0.1.9',
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+            'BurntSushi/ripgrep',
+        },
+        opts = {},
     },
+    {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        build = 'make',
+    },
+    {
+        'rmagatti/goto-preview',
+        event = 'BufEnter',
+        opts = {},
+        keys = {
+            {
+                '<leader>d',
+                '<cmd>lua require("goto-preview").goto_preview_definition()<CR>',
+                noremap = true,
+            },
+            {
+                '<leader>r',
+                '<cmd>lua require("goto-preview").goto_preview_references()<CR>',
+                noremap = true,
+            },
+
+            {
+                '<leader>gc',
+                '<cmd>lua require("goto-preview").close_all_win()<CR>',
+                noremap = true,
+            },
+        },
+    },
+    {
+        'dnlhc/glance.nvim',
+        cmd = 'Glance',
+        opts = {
+            list = {
+                position = 'left',
+                width = 0.33,
+            },
+        },
+    },
+
     {
         'nvim-treesitter/nvim-treesitter',
         branch = 'master',
@@ -751,10 +878,11 @@ for _, server in ipairs(enabled_servers) do
 end
 
 require('codex').status()
-
+require('telescope').load_extension('fzf')
+require('telescope').load_extension('rest')
 local builtin = require('telescope.builtin')
-
 local refresh = require('oil.actions').refresh
+
 local orig_refresh = refresh.callback
 refresh.callback = function(...)
     git_status = new_git_status()
@@ -769,11 +897,11 @@ vim.keymap.set('n', '<leader>pg', builtin.git_files, { desc = 'Telescope find fi
 vim.keymap.set('n', '<leader>ps', builtin.live_grep, { desc = 'Telescope live grep' })
 vim.keymap.set('n', '<leader>pb', builtin.buffers, { desc = 'Telescope buffers' })
 vim.keymap.set('n', '<leader>ph', builtin.help_tags, { desc = 'Telescope help tags' })
-vim.keymap.set('n', '<leader>d', vim.lsp.buf.definition, { desc = 'Go to definition' })
+vim.keymap.set('n', '<leader>gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
 vim.keymap.set('n', '<leader>ga', vim.lsp.buf.code_action, { desc = 'LSP code action' })
 vim.keymap.set('n', '<leader>R', vim.lsp.buf.rename, { desc = 'LSP rename' })
 vim.keymap.set('n', '<leader>K', vim.lsp.buf.hover, { desc = 'LSP hover' })
-vim.keymap.set('n', '<leader>r', builtin.lsp_references, { desc = 'LSP references' })
+vim.keymap.set('n', '<leader>gr', builtin.lsp_references, { desc = 'LSP references' })
 vim.keymap.set('n', '<leader>fz', ':resize 10<CR>')
 vim.keymap.set('n', '<leader>w', ':w<CR>')
 vim.keymap.set('t', '<Esc>', '<C-\\><C-N>')
