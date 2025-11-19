@@ -171,19 +171,103 @@ require('lazy').setup({
         },
     },
     {
+        'folke/snacks.nvim',
+        priority = 1000,
+        lazy = false,
+        opts = {
+            dashboard = {
+                enabled = true,
+                sections = {
+                    { section = 'header' },
+                    {
+                        pane = 2,
+                        section = 'terminal',
+                        cmd = 'colorscript -e square',
+                        height = 5,
+                        padding = 1,
+                    },
+                    { section = 'keys', gap = 1, padding = 1 },
+                    {
+                        pane = 2,
+                        icon = ' ',
+                        desc = 'Browse Repo',
+                        padding = 1,
+                        key = 'b',
+                        action = function()
+                            Snacks.gitbrowse()
+                        end,
+                    },
+                    function()
+                        local in_git = Snacks.git.get_root() ~= nil
+                        local cmds = {
+                            {
+                                title = 'Notifications',
+                                cmd = 'gh notify -s -a -n5',
+                                action = function()
+                                    vim.ui.open('https://github.com/notifications')
+                                end,
+                                key = 'n',
+                                icon = ' ',
+                                height = 5,
+                                enabled = true,
+                            },
+                            {
+                                title = 'Open Issues',
+                                cmd = 'gh issue list -L 3',
+                                key = 'i',
+                                action = function()
+                                    vim.fn.jobstart('gh issue list --web', { detach = true })
+                                end,
+                                icon = ' ',
+                                height = 7,
+                            },
+                            {
+                                icon = ' ',
+                                title = 'Open PRs',
+                                cmd = 'gh pr list -L 3',
+                                key = 'P',
+                                action = function()
+                                    vim.fn.jobstart('gh pr list --web', { detach = true })
+                                end,
+                                height = 7,
+                            },
+                            {
+                                icon = ' ',
+                                title = 'Git Status',
+                                cmd = 'git --no-pager diff --stat -B -M -C',
+                                height = 10,
+                            },
+                        }
+                        return vim.tbl_map(function(cmd)
+                            return vim.tbl_extend('force', {
+                                pane = 2,
+                                section = 'terminal',
+                                enabled = in_git,
+                                padding = 1,
+                                ttl = 5 * 60,
+                                indent = 3,
+                            }, cmd)
+                        end, cmds)
+                    end,
+                    { section = 'startup' },
+                },
+            },
+        },
+    },
+    {
         'norcalli/nvim-colorizer.lua',
         opts = {},
     },
-    {
-        'AckslD/nvim-neoclip.lua',
-        dependencies = {
-            { 'nvim-telescope/telescope.nvim' },
-        },
-        opts = {},
-        keys = {
-            { '<leader>y', '<cmd>Telescope registers<CR>' },
-        },
-    },
+    -- {
+    --     'AckslD/nvim-neoclip.lua',
+    --     dependencies = {
+    --         { 'nvim-telescope/telescope.nvim' },
+    --     },
+    --     opts = {},
+    --     keys = {
+    --         { '<leader>y', '<cmd>Telescope registers<CR>' },
+    --     },
+    -- },
     {
         'chentoast/marks.nvim',
         event = 'VeryLazy',
@@ -587,10 +671,6 @@ require('lazy').setup({
         'rest-nvim/rest.nvim',
         dependencies = {
             'nvim-treesitter/nvim-treesitter',
-            opts = function(_, opts)
-                opts.ensure_installed = opts.ensure_installed or {}
-                table.insert(opts.ensure_installed, 'http')
-            end,
             keys = {
                 { '<leader>pe', '<cmd>lua require("telescope").extensions.rest.select_env()<CR>' },
             },
@@ -690,7 +770,8 @@ require('lazy').setup({
                 'stylua',
                 'prettier',
                 'prettierd',
-                'python-lsp-server',
+                -- 'python-lsp-server',
+                'jedi-language-server',
                 'isort',
                 'html-lsp',
                 'htmlbeautifier',
@@ -730,7 +811,6 @@ require('lazy').setup({
     },
     {
         'nvim-telescope/telescope.nvim',
-        tag = '0.1.9',
         dependencies = {
             'nvim-lua/plenary.nvim',
             'BurntSushi/ripgrep',
@@ -777,11 +857,12 @@ require('lazy').setup({
 
     {
         'nvim-treesitter/nvim-treesitter',
-        branch = 'master',
+        branch = 'main',
         lazy = false,
         build = ':TSUpdate',
-        opts = {
-            ensure_installed = {
+        config = function()
+            require('nvim-treesitter').setup({})
+            local ensure_installed = {
                 'python',
                 'lua',
                 'dart',
@@ -798,11 +879,18 @@ require('lazy').setup({
                 'vue',
                 'vim',
                 'yaml',
-            },
-            highlight = {
-                enable = true,
-            },
-        },
+                'markdown',
+                'markdown_inline',
+                'http',
+            }
+            local installed = require('nvim-treesitter').get_installed()
+            local not_installed = vim.tbl_filter(function(parser)
+                return not vim.tbl_contains(installed, parser)
+            end, ensure_installed)
+            if #not_installed > 0 then
+                require('nvim-treesitter').install(not_installed)
+            end
+        end,
     },
     {
         'nyngwang/NeoZoom.lua',
@@ -872,7 +960,7 @@ vim.lsp.config('pylsp', {
     },
 })
 
-local enabled_servers = { 'pylsp', 'html-lsp', 'vue_lsp', 'lua_ls', 'djls', 'cssls' }
+local enabled_servers = { 'pylsp', 'html', 'vue_ls', 'lua_ls', 'cssls' }
 for _, server in ipairs(enabled_servers) do
     vim.lsp.enable(server)
 end
