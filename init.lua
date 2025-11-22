@@ -93,6 +93,49 @@ vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
         vim.bo.undofile = false
     end,
 })
+
+vim.api.nvim_create_autocmd('User', {
+    pattern = 'OilActionsPost',
+    callback = function(event)
+        if event.data.actions[1].type == 'move' then
+            Snacks.rename.on_rename_file(event.data.actions[1].src_url, event.data.actions[1].dest_url)
+        end
+    end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'python' },
+    callback = function()
+        vim.treesitter.start()
+    end,
+})
+
+local function reload_dartls_if_inactive()
+    local dartls_client
+    for _, client in ipairs(vim.lsp.get_clients()) do
+        if client.name == 'dartls' then
+            dartls_client = client
+            break
+        end
+    end
+
+    vim.defer_fn(function()
+        if dartls_client and not dartls_client.is_stopped() then
+            return
+        end
+
+        if dartls_client and dartls_client.stop then
+            dartls_client.stop()
+        end
+
+        require('flutter-tools.lsp').attach()
+    end, 2000)
+end
+
+vim.api.nvim_create_autocmd('BufWritePost', {
+    pattern = '*.dart',
+    callback = reload_dartls_if_inactive,
+})
+
 function _G.get_oil_winbar()
     local bufnr = vim.api.nvim_win_get_buf(vim.g.statusline_winid)
     local dir = require('oil').get_current_dir(bufnr)
@@ -162,12 +205,27 @@ require('lazy').setup({
     {
         'akinsho/toggleterm.nvim',
         version = '*',
-        opts = {},
+        opts = {
+            shade_terminals = false,
+            size = function(term)
+                if term.direction == 'horizontal' then
+                    return 10
+                elseif term.direction == 'vertical' then
+                    return vim.o.columns * 0.4
+                end
+            end,
+        },
         keys = {
 
-            { '<leader>zz', '<cmd>ToggleTerm direction=float<CR>', noremap = true, silent = true },
-            { '<leader>zj', '<cmd>ToggleTerm direction=horizontal<CR>', noremap = true, silent = true },
-            { '<leader>zl', '<cmd>ToggleTerm direction=vertical<CR>', noremap = true, silent = true },
+            { '<leader>zz', '<cmd>exe v:count1 . "ToggleTerm direction=float"<CR>', noremap = true, silent = true },
+            {
+                '<leader>zj',
+                '<cmd>exe v:count1 . "ToggleTerm direction=horizontal"<CR>',
+                noremap = true,
+                silent = true,
+            },
+            { '<leader>zl', '<cmd>exe v:count1 . "ToggleTerm direction=vertical"<CR>', noremap = true, silent = true },
+            { '<leader>zx', '<cmd>ToggleTermToggleAll<CR>', noremap = true, silent = true },
         },
     },
     {
@@ -258,27 +316,8 @@ require('lazy').setup({
         'norcalli/nvim-colorizer.lua',
         opts = {},
     },
-    -- {
-    --     'AckslD/nvim-neoclip.lua',
-    --     dependencies = {
-    --         { 'nvim-telescope/telescope.nvim' },
-    --     },
-    --     opts = {},
-    --     keys = {
-    --         { '<leader>y', '<cmd>Telescope registers<CR>' },
-    --     },
-    -- },
     {
         'chentoast/marks.nvim',
-        event = 'VeryLazy',
-        opts = {},
-    },
-    {
-        'zeioth/garbage-day.nvim',
-        dependencies = {
-            { 'neovim/nvim-lspconfig' },
-        },
-        -- lazy = false,
         event = 'VeryLazy',
         opts = {},
     },
@@ -332,7 +371,6 @@ require('lazy').setup({
                     vim.keymap.set(mode, l, r, opts)
                 end
 
-                -- Navigation
                 map('n', ']c', function()
                     if vim.wo.diff then
                         vim.cmd.normal({ ']c', bang = true })
@@ -349,7 +387,6 @@ require('lazy').setup({
                     end
                 end)
 
-                -- Actions
                 map('n', '<leader>hs', gitsigns.stage_hunk)
                 map('n', '<leader>hr', gitsigns.reset_hunk)
 
@@ -388,17 +425,37 @@ require('lazy').setup({
             end,
         },
     },
-    -- {
-    --     'rmehri01/onenord.nvim',
-    --     opts = {},
-    --     priority = 1000,
-    -- },
     {
-        'joshdick/onedark.vim',
-        config = function()
-            vim.cmd('colorscheme onedark')
-        end,
+        'rmehri01/onenord.nvim',
+        opts = {},
         priority = 1000,
+        enabled = false,
+    },
+    {
+        'navarasu/onedark.nvim',
+        priority = 1000, -- make sure to load this before all the other start plugins
+        config = function()
+            require('onedark').setup({
+                style = 'dark',
+                highlights = {
+                    ['@keyword.import'] = { fg = '$blue' },
+                    ['@variable.parameter'] = { fg = '$fg' },
+                    ['@operator'] = { fg = '$purple' },
+                },
+            })
+            require('onedark').load()
+        end,
+    },
+    {
+        'maxmx03/solarized.nvim',
+        lazy = false,
+        priority = 1000,
+        config = function()
+            vim.o.background = 'light'
+            require('solarized').setup({})
+            vim.cmd.colorscheme('solarized')
+        end,
+        enabled = false,
     },
     {
         'kylechui/nvim-surround',
@@ -726,14 +783,26 @@ require('lazy').setup({
         end,
         keys = {
             { '-', '<Cmd>Oil<CR>', desc = 'Browse files from here' },
+            {
+                '<leader>-',
+                function()
+                    if vim.o.filetype == 'oil' then
+                        vim.cmd('q')
+                    else
+                        vim.cmd('vsplit | wincmd h | vertical resize ' .. vim.o.columns * 0.15)
+                        require('oil').open()
+                    end
+                end,
+            },
         },
     },
     {
-        'https://github.com/tpope/vim-sleuth',
+        'tpope/vim-sleuth',
         event = { 'BufReadPost', 'BufNewFile' },
+        enabled = false,
     },
     {
-        'https://github.com/farmergreg/vim-lastplace',
+        'farmergreg/vim-lastplace',
         event = 'BufReadPost',
     },
     {
@@ -750,7 +819,7 @@ require('lazy').setup({
         },
     },
     {
-        'https://github.com/nvim-lualine/lualine.nvim',
+        'nvim-lualine/lualine.nvim',
         event = 'VeryLazy',
         opts = {},
     },
@@ -795,6 +864,11 @@ require('lazy').setup({
                     'env/',
                 },
             },
+            lsp = {
+                color = {
+                    enabled = true,
+                },
+            },
         },
         dependencies = {
             'nvim-lua/plenary.nvim',
@@ -822,29 +896,6 @@ require('lazy').setup({
         build = 'make',
     },
     {
-        'rmagatti/goto-preview',
-        event = 'BufEnter',
-        opts = {},
-        keys = {
-            {
-                '<leader>d',
-                '<cmd>lua require("goto-preview").goto_preview_definition()<CR>',
-                noremap = true,
-            },
-            {
-                '<leader>r',
-                '<cmd>lua require("goto-preview").goto_preview_references()<CR>',
-                noremap = true,
-            },
-
-            {
-                '<leader>gc',
-                '<cmd>lua require("goto-preview").close_all_win()<CR>',
-                noremap = true,
-            },
-        },
-    },
-    {
         'dnlhc/glance.nvim',
         cmd = 'Glance',
         opts = {
@@ -853,8 +904,11 @@ require('lazy').setup({
                 width = 0.33,
             },
         },
+        keys = {
+            { '<leader>d', '<cmd>Glance definitions<CR>' },
+            { '<leader>r', '<cmd>Glance references<CR>' },
+        },
     },
-
     {
         'nvim-treesitter/nvim-treesitter',
         branch = 'main',
@@ -947,23 +1001,28 @@ require('lazy').setup({
     },
 })
 
-vim.lsp.config('pylsp', {
-    cmd = { vim.fn.expand('~/.venvs/pylsp/bin/pylsp') },
-    settings = {
-        pylsp = {
-            plugins = {
-                pylsp_rope = { rename = true },
-                rope_rename = { enabled = false },
-                jedi_rename = { enaled = false },
-            },
-        },
-    },
-})
-
 local enabled_servers = { 'pylsp', 'html', 'vue_ls', 'lua_ls', 'cssls' }
 for _, server in ipairs(enabled_servers) do
     vim.lsp.enable(server)
 end
+vim.lsp.config('pylsp', {
+    cmd = { 'pylsp' },
+    settings = {
+        pylsp = {
+            plugins = {
+                pycodestyle = {
+                    maxLineLength = 88,
+                },
+                pyflakes = {
+                    maxLineLength = 88,
+                },
+                mccabe = {
+                    maxLineLength = 88,
+                },
+            },
+        },
+    },
+})
 
 require('codex').status()
 require('telescope').load_extension('fzf')
@@ -977,6 +1036,8 @@ refresh.callback = function(...)
     orig_refresh(...)
 end
 
+vim.api.nvim_set_hl(0, '@spell.python', {})
+vim.api.nvim_set_hl(0, '@lsp.type.parameter.dart', {})
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { silent = true })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>en', vim.diagnostic.goto_next)
